@@ -98,6 +98,38 @@ button,input,textarea,select{font:inherit}
 .date .lifeDayInline{font-weight:900;color:#075b61}
 @media(max-width:520px){.dateWrap{min-width:118px}.date .dateStatus{font-size:10px}}
 
+
+/* v2.11.3 centered date navigation */
+.dateNav{
+  display:grid;
+  grid-template-columns:31px minmax(150px,1fr) 31px;
+  align-items:center;
+  column-gap:10px;
+}
+.dateWrap{
+  min-width:0 !important;
+  width:100%;
+  align-items:center !important;
+  text-align:center;
+}
+.date{
+  width:100%;
+  text-align:center;
+}
+.jumpToday{
+  align-self:center;
+}
+.dateBtn{
+  justify-self:center;
+}
+@media(max-width:600px){
+  .dateNav{
+    grid-template-columns:29px minmax(122px,1fr) 29px;
+    column-gap:8px;
+  }
+  .dateWrap{min-width:0 !important}
+}
+
 </style>
 </head>
 <body>
@@ -372,7 +404,7 @@ function renderData(){
   document.getElementById('dataCurrentStreak').textContent=currentStreakValue();
   document.getElementById('dataLongestStreak').textContent=longestStreakValue();
 }
-function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.11.2',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Life OS Day','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,lifeDayNumberFor(k)||'',p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
+function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.11.3',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Life OS Day','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,lifeDayNumberFor(k)||'',p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
 function switchTab(tab){['today','domains','timing','week','data'].forEach(t=>document.getElementById(t+'View').style.display=t===tab?'block':'none');document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}document.getElementById('prevDay').onclick=()=>{
  selectedDate=new Date(selectedDate);
  selectedDate.setDate(selectedDate.getDate()-1);
