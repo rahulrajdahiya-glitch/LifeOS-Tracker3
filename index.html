@@ -4,10 +4,10 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#f6ffff"/>
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="Life OS"/>
- <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <title>Life OS</title>
 <style>
 :root{
@@ -83,6 +83,21 @@ button,input,textarea,select{font:inherit}
  .dateWrap{min-width:124px}
 }
 
+
+.lifeDayStrip{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+.lifeDayStat{background:rgba(255,255,255,.82);border:1px solid #cfe5e3;border-radius:14px;padding:10px 12px}
+.lifeDayStat span{display:block;font-size:8px;letter-spacing:.09em;text-transform:uppercase;color:#7b8586;margin-bottom:4px;font-weight:800}
+.lifeDayStat b{display:block;font-size:14px;color:#075b61}
+.lifeDayStat:first-child{background:linear-gradient(145deg,#e2f7f6,#fff4ee);border-color:#bde4e2}
+.lifeDayStat:first-child b{color:#ef614e}
+@media(max-width:560px){.lifeDayStrip{grid-template-columns:1fr 1fr}.lifeDayStat{padding:9px 10px}}
+
+
+.dateWrap{min-width:150px}
+.date .dateStatus{display:block;margin-top:3px;font-size:11px;font-weight:800;letter-spacing:.02em;color:#ef614e}
+.date .lifeDayInline{font-weight:900;color:#075b61}
+@media(max-width:520px){.dateWrap{min-width:118px}.date .dateStatus{font-size:10px}}
+
 </style>
 </head>
 <body>
@@ -97,7 +112,6 @@ button,input,textarea,select{font:inherit}
   <button class="dateBtn" id="prevDay" aria-label="Previous day">‹</button>
   <div class="dateWrap">
     <div class="date" id="date"></div>
-    <div class="dateHint">Review or fill any previous day</div>
     <button class="jumpToday" id="jumpToday">Jump to today</button>
   </div>
   <button class="dateBtn" id="nextDay" aria-label="Next day">›</button>
@@ -131,6 +145,12 @@ button,input,textarea,select{font:inherit}
   <div class="stat"><b id="saved">—</b><span>time saved / delayed</span></div>
  </div>
 </div>
+<div class="lifeDayStrip">
+  <div class="lifeDayStat"><span>Life OS Day</span><b id="lifeDayNumber">Next: Day 1</b></div>
+  <div class="lifeDayStat"><span>Active Days</span><b id="activeDays">0</b></div>
+  <div class="lifeDayStat"><span>Current Streak</span><b id="currentStreak">0 days</b></div>
+  <div class="lifeDayStat"><span>Longest Streak</span><b id="longestStreak">0 days</b></div>
+</div>
 </section>
 <div class="quick">
  <div class="quickCard"><div class="label">Next Practice</div><h3 id="nextName">Morning Discontinuity</h3><p id="nextSub">Target 4:45 AM</p></div>
@@ -143,7 +163,12 @@ button,input,textarea,select{font:inherit}
 <main id="domainsView" style="display:none"><div class="sectionHead"><h2>Seven Domains</h2><small>Preferred Self</small></div><div class="domains" id="domains"></div></main>
 <main id="timingView" style="display:none"><div class="sectionHead"><h2>Timing & Rhythm</h2><small>Target vs actual</small></div><div class="analyticsCard"><div class="metric"><div class="metricRow"><span>Completed with timing</span><b id="timedCount">0</b></div><div class="bar"><i id="timedBar" style="width:0%"></i></div></div><div class="metric"><div class="metricRow"><span>Within ±10 minutes</span><b id="onTargetPct">—</b></div><div class="bar"><i id="onTargetBar" style="width:0%"></i></div></div><div class="metric"><div class="metricRow"><span>Average deviation</span><b id="avgDev">—</b></div></div></div><div id="timingList"></div></main>
 <main id="weekView" style="display:none"><div class="sectionHead"><h2>Weekly Reflection</h2><small>Last 7 days</small></div><div class="analyticsCard"><h3 style="margin-top:0">Rhythm Score</h3><div style="font:38px Georgia,serif;color:#8a6b56;margin:8px 0" id="weekScore">—</div><div class="metric"><div class="metricRow"><span>Completion</span><b id="weekCompletion">—</b></div><div class="bar"><i id="weekCompletionBar" style="width:0%"></i></div></div><div class="metric"><div class="metricRow"><span>Schedule alignment</span><b id="weekAlignment">—</b></div><div class="bar"><i id="weekAlignmentBar" style="width:0%"></i></div></div><div class="empty" id="weekInsight">After several days of use, Life OS will show where your day consistently drifts.</div></div></main>
-<main id="dataView" style="display:none"><div class="sectionHead"><h2>Data & Backup</h2><small>Your history</small></div><div class="analyticsCard"><div class="dataGrid"><div class="stat"><b id="dataDays">0</b><span>days recorded</span></div><div class="stat"><b id="dataEntries">0</b><span>practice logs</span></div></div></div><div class="analyticsCard"><h3 style="margin-top:0">Full Backup</h3><p class="empty">Save your complete Life OS record as JSON and keep it in iCloud Drive.</p><button class="btn primary" id="backupBtn" style="width:100%">Export Full Backup (.json)</button><div style="height:8px"></div><button class="btn secondary" id="restoreBtn" style="width:100%">Restore from Backup</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div><div class="analyticsCard"><h3 style="margin-top:0">Spreadsheet Export</h3><button class="btn secondary" id="csvBtn" style="width:100%">Export History (.csv)</button></div></main>
+<main id="dataView" style="display:none"><div class="sectionHead"><h2>Data & Backup</h2><small>Your history</small></div><div class="analyticsCard"><div class="dataGrid">
+<div class="stat"><b id="dataDays">0</b><span>Life OS active days</span></div>
+<div class="stat"><b id="dataEntries">0</b><span>practice logs</span></div>
+<div class="stat"><b id="dataCurrentStreak">0</b><span>current streak</span></div>
+<div class="stat"><b id="dataLongestStreak">0</b><span>longest streak</span></div>
+</div></div><div class="analyticsCard"><h3 style="margin-top:0">Full Backup</h3><p class="empty">Save your complete Life OS record as JSON and keep it in iCloud Drive.</p><button class="btn primary" id="backupBtn" style="width:100%">Export Full Backup (.json)</button><div style="height:8px"></div><button class="btn secondary" id="restoreBtn" style="width:100%">Restore from Backup</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div><div class="analyticsCard"><h3 style="margin-top:0">Spreadsheet Export</h3><button class="btn secondary" id="csvBtn" style="width:100%">Export History (.csv)</button></div></main>
 </div>
 <div class="nav"><div class="navInner"><button class="active" data-tab="today">☀︎<br>Today</button><button data-tab="domains">◈<br>Domains</button><button data-tab="timing">◷<br>Timing</button><button data-tab="week">▥<br>Week</button><button data-tab="data">⇩<br>Data</button></div></div>
 <div class="modal" id="timeModal"><div class="sheet"><h3 id="timeTitle">Edit Actual Time</h3><p>Enter the real start and finish time. You can also leave finish blank.</p><div class="fields"><div class="field"><label>Started</label><input type="time" id="startInput"></div><div class="field"><label>Finished</label><input type="time" id="endInput"></div></div><div class="sheetActions"><button class="btn secondary" id="cancelTime">Cancel</button><button class="btn primary" id="saveTime">Save</button></div></div></div>
@@ -233,13 +258,94 @@ let selectedDate=new Date(today);
 let store=JSON.parse(localStorage.getItem('lifeos-v26')||'{}');
 function selectedKey(){return dateKey(selectedDate)}
 function dayStore(k=selectedKey()){if(!store[k])store[k]={};return store[k]}
+function isMeaningfulRecord(r){
+  if(!r || typeof r!=='object') return false;
+  if(r.start || r.end || r.done || r.note || r.choice || r.started) return true;
+  if(r.items && Object.values(r.items).some(Boolean)) return true;
+  return false;
+}
+function isActiveDayKey(k){
+  const d=store[k];
+  if(!d || typeof d!=='object') return false;
+  if(d._sleep && (d._sleep.sleep || d._sleep.wake)) return true;
+  return Object.keys(d).some(id=>id!=='_sleep' && isMeaningfulRecord(d[id]));
+}
+function activeDayKeys(){
+  return Object.keys(store).filter(isActiveDayKey).sort();
+}
+function parseDateKey(k){
+  const [y,m,d]=k.split('-').map(Number);
+  return new Date(y,m-1,d);
+}
+function dayDiff(a,b){
+  const A=parseDateKey(a),B=parseDateKey(b);
+  return Math.round((B-A)/(24*60*60*1000));
+}
+function lifeDayNumberFor(k){
+  const keys=activeDayKeys();
+  const idx=keys.indexOf(k);
+  return idx>=0 ? idx+1 : null;
+}
+function longestStreakValue(){
+  const keys=activeDayKeys();
+  if(!keys.length) return 0;
+  let longest=1,run=1;
+  for(let i=1;i<keys.length;i++){
+    if(dayDiff(keys[i-1],keys[i])===1) run++;
+    else run=1;
+    if(run>longest) longest=run;
+  }
+  return longest;
+}
+function currentStreakValue(){
+  const keys=activeDayKeys();
+  if(!keys.length) return 0;
+  const latest=keys[keys.length-1];
+  const gapFromToday=dayDiff(latest,todayKey);
+  // Preserve a live streak through today if the latest active day is today or yesterday.
+  if(gapFromToday<0 || gapFromToday>1) return 0;
+  let run=1;
+  for(let i=keys.length-1;i>0;i--){
+    if(dayDiff(keys[i-1],keys[i])===1) run++;
+    else break;
+  }
+  return run;
+}
+function renderLifeDayTracking(){
+  const keys=activeDayKeys();
+  const n=lifeDayNumberFor(selectedKey());
+  const priorCount=keys.filter(k=>k<selectedKey()).length;
+  const dayText=n ? `Day ${n}` : (selectedKey()===todayKey ? `Next: Day ${priorCount+1}` : 'Not active');
+  document.getElementById('lifeDayNumber').textContent=dayText;
+  document.getElementById('activeDays').textContent=keys.length;
+  const cs=currentStreakValue(), ls=longestStreakValue();
+  document.getElementById('currentStreak').textContent=`${cs} day${cs===1?'':'s'}`;
+  document.getElementById('longestStreak').textContent=`${ls} day${ls===1?'':'s'}`;
+}
+
 dayStore(todayKey);dayStore(selectedKey());
 let editing=null;
 function renderSelectedDateLabel(){
  const isToday=selectedKey()===todayKey;
+ const lifeN=lifeDayNumberFor(selectedKey());
+
+ let status='';
+ if(isToday){
+   status='Today';
+ }else{
+   const diff=dayDiff(selectedKey(),todayKey);
+   const agoText=diff===1?'Yesterday':`${diff} days ago`;
+   status=agoText;
+ }
+
+ if(lifeN){
+   status+=' · <span class="lifeDayInline">Life OS Day '+lifeN+'</span>';
+ }
+
  document.getElementById('date').innerHTML=
    selectedDate.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})+
-   '<br><span style="color:#b9785b">'+(isToday?'Today · Full Architecture':'Historical day')+'</span>';
+   '<span class="dateStatus">'+status+'</span>';
+
  document.getElementById('nextDay').disabled=isToday;
  document.getElementById('nextDay').style.opacity=isToday?'.35':'1';
 }
@@ -255,8 +361,18 @@ function renderHeader(){let req=practices.filter(p=>!p.optional),done=req.filter
 function renderDomains(){let h=document.getElementById('domains');h.innerHTML='';domainsData.forEach(d=>{let x=document.createElement('div');x.className='domain';x.innerHTML=`<div class="domainIcon">${d[3]}</div><div class="num">DOMAIN ${d[0]}</div><h3>${d[1]}</h3><p>${d[2]}</p>`;h.appendChild(x)})}
 function renderTiming(){let h=document.getElementById('timingList');h.innerHTML='';let timed=practices.filter(p=>dayStore()[p.id]?.start),vs=timed.map(p=>Math.abs(variance(p,dayStore()[p.id]))),on=vs.filter(v=>v<=10).length,pct=vs.length?Math.round(on/vs.length*100):0,avg=vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):null;document.getElementById('timedCount').textContent=`${timed.length} / ${practices.length}`;document.getElementById('timedBar').style.width=Math.round(timed.length/practices.length*100)+'%';document.getElementById('onTargetPct').textContent=vs.length?pct+'%':'—';document.getElementById('onTargetBar').style.width=pct+'%';document.getElementById('avgDev').textContent=avg===null?'—':avg+' min';practices.forEach(p=>{let r=dayStore()[p.id]||{},v=variance(p,r),x=document.createElement('div');x.className='practice';x.innerHTML=`<div class="practiceMain"><div class="icon">${svg[p.icon]}</div><div><h3>${p.name}</h3><div class="sub">Target ${tl(p.target)} · Actual ${tl(r.start)}</div></div><div class="var ${vclass(v)}" style="font-weight:800;font-size:12px">${vlabel(v)}</div></div>`;h.appendChild(x)})}
 function last7(){let a=[];for(let i=6;i>=0;i--){let d=new Date();d.setDate(d.getDate()-i);a.push(dateKey(d))}return a}function renderWeek(){let days=last7(),req=practices.filter(p=>!p.optional),possible=req.length*7,done=0,timed=0,vs=[];days.forEach(k=>req.forEach(p=>{let r=store[k]?.[p.id];if(r?.done)done++;if(r?.start){timed++;vs.push(Math.abs(mins(r.start)-mins(p.target)))}}));let completion=Math.round(done/possible*100),avg=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null,alignment=avg===null?0:Math.max(0,Math.round(100-avg*1.5)),score=Math.round(completion*.55+alignment*.45);document.getElementById('weekScore').textContent=done?score+'%':'—';document.getElementById('weekCompletion').textContent=completion+'%';document.getElementById('weekCompletionBar').style.width=completion+'%';document.getElementById('weekAlignment').textContent=vs.length?alignment+'%':'—';document.getElementById('weekAlignmentBar').style.width=(vs.length?alignment:0)+'%';document.getElementById('weekInsight').textContent=timed>=4?`You have ${timed} timed records in the last seven days. Average schedule deviation is ${Math.round(avg)} minutes.`:'After several days of use, Life OS will show where your day consistently drifts.'}
-function renderData(){let days=0,entries=0;Object.keys(store).forEach(k=>{let ids=Object.keys(store[k]||{}).filter(id=>id!=='_sleep'&&(store[k][id]?.start||store[k][id]?.done||store[k][id]?.note||store[k][id]?.choice));if(ids.length||store[k]?._sleep?.sleep||store[k]?._sleep?.wake){days++;entries+=ids.length}});document.getElementById('dataDays').textContent=days;document.getElementById('dataEntries').textContent=entries}
-function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.10',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
+function renderData(){
+  const keys=activeDayKeys();
+  let entries=0;
+  keys.forEach(k=>{
+    entries += Object.keys(store[k]||{}).filter(id=>id!=='_sleep' && isMeaningfulRecord(store[k][id])).length;
+  });
+  document.getElementById('dataDays').textContent=keys.length;
+  document.getElementById('dataEntries').textContent=entries;
+  document.getElementById('dataCurrentStreak').textContent=currentStreakValue();
+  document.getElementById('dataLongestStreak').textContent=longestStreakValue();
+}
+function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.11.2',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Life OS Day','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,lifeDayNumberFor(k)||'',p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
 function switchTab(tab){['today','domains','timing','week','data'].forEach(t=>document.getElementById(t+'View').style.display=t===tab?'block':'none');document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}document.getElementById('prevDay').onclick=()=>{
  selectedDate=new Date(selectedDate);
  selectedDate.setDate(selectedDate.getDate()-1);
@@ -276,7 +392,7 @@ document.getElementById('jumpToday').onclick=()=>{
  selectedDate=new Date(today);dayStore();renderSelectedDateLabel();renderAll();
  window.scrollTo({top:0,behavior:'smooth'});
 };
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));function renderAll(){renderSleep();renderPractices();renderHeader();renderDomains();renderTiming();renderWeek();renderData()}renderAll();
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));function renderAll(){renderSleep();renderPractices();renderHeader();renderLifeDayTracking();renderDomains();renderTiming();renderWeek();renderData();renderSelectedDateLabel()}renderAll();
 </script>
 </body>
 </html>
