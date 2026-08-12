@@ -130,6 +130,25 @@ button,input,textarea,select{font:inherit}
   .dateWrap{min-width:0 !important}
 }
 
+
+/* v2.17 stable live-time layer */
+.liveNow{margin-top:5px;text-align:center;line-height:1.05}
+.liveNow span{display:block;font-size:7px;letter-spacing:.11em;font-weight:900;color:#8a9697}
+.liveNow b{display:block;margin-top:2px;font-size:13px;font-variant-numeric:tabular-nums;color:#075b61}
+.liveRun{margin:10px 0 2px;padding:9px 10px;border:1px solid #cfe5e3;border-radius:12px;background:#f7fbfb;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.liveRun .runLabel{font-size:8px;letter-spacing:.08em;text-transform:uppercase;font-weight:900;color:#879394}
+.liveRun .runValue{font-size:18px;font-weight:900;color:#ef614e;font-variant-numeric:tabular-nums}
+.liveRun .runNow{font-size:9px;color:#7b8788;text-align:right}
+.liveRun .runNow b{display:block;color:#075b61;font-size:11px;font-variant-numeric:tabular-nums}
+@media(max-width:520px){.liveNow b{font-size:12px}.liveRun .runValue{font-size:17px}}
+
+
+/* v2.18 session controls */
+.sessionControls{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.btn.pauseBtn{background:#eef8f7;color:#075b61;border:1px solid #cfe5e3}
+.btn.resetBtn{background:#fff6f3;color:#9d584d;border:1px solid #efd7d0}
+.practice.open{box-shadow:0 8px 24px rgba(7,91,97,.06)}
+
 </style>
 </head>
 <body>
@@ -144,7 +163,7 @@ button,input,textarea,select{font:inherit}
   <button class="dateBtn" id="prevDay" aria-label="Previous day">‹</button>
   <div class="dateWrap">
     <div class="date" id="date"></div>
-    <button class="jumpToday" id="jumpToday">Jump to today</button>
+    <button class="jumpToday" id="jumpToday">Jump to today</button><div class="liveNow"><span>NOW</span><b id="liveNowClock">--:--:--</b></div>
   </div>
   <button class="dateBtn" id="nextDay" aria-label="Next day">›</button>
 </div></div>
@@ -155,9 +174,9 @@ button,input,textarea,select{font:inherit}
 <div class="sleepCard">
   <div class="kicker">Sleep & Wake</div>
   <div class="sleepGrid">
-   <div class="sleepCell"><label>Target Sleep</label><strong>9:15 PM</strong></div>
+   <div class="sleepCell"><label>Target Sleep</label><strong id="targetSleepDisplay">9:15 PM</strong></div>
    <div class="sleepCell"><label>Actual Sleep</label><strong id="sleepActual">—</strong></div>
-   <div class="sleepCell"><label>Target Wake</label><strong>4:45 AM</strong></div>
+   <div class="sleepCell"><label>Target Wake</label><strong id="targetWakeDisplay">4:45 AM</strong></div>
    <div class="sleepCell"><label>Actual Wake</label><strong id="wakeActual">—</strong></div>
   </div>
   <div class="sleepGrid" style="margin-top:8px">
@@ -203,8 +222,8 @@ button,input,textarea,select{font:inherit}
 </div></div><div class="analyticsCard"><h3 style="margin-top:0">Full Backup</h3><p class="empty">Save your complete Life OS record as JSON and keep it in iCloud Drive.</p><button class="btn primary" id="backupBtn" style="width:100%">Export Full Backup (.json)</button><div style="height:8px"></div><button class="btn secondary" id="restoreBtn" style="width:100%">Restore from Backup</button><input type="file" id="restoreFile" accept=".json,application/json" style="display:none"></div><div class="analyticsCard"><h3 style="margin-top:0">Spreadsheet Export</h3><button class="btn secondary" id="csvBtn" style="width:100%">Export History (.csv)</button></div></main>
 </div>
 <div class="nav"><div class="navInner"><button class="active" data-tab="today">☀︎<br>Today</button><button data-tab="domains">◈<br>Domains</button><button data-tab="timing">◷<br>Timing</button><button data-tab="week">▥<br>Week</button><button data-tab="data">⇩<br>Data</button></div></div>
-<div class="modal" id="timeModal"><div class="sheet"><h3 id="timeTitle">Edit Actual Time</h3><p>Enter the real start and finish time. You can also leave finish blank.</p><div class="fields"><div class="field"><label>Started</label><input type="time" id="startInput"></div><div class="field"><label>Finished</label><input type="time" id="endInput"></div></div><div class="sheetActions"><button class="btn secondary" id="cancelTime">Cancel</button><button class="btn primary" id="saveTime">Save</button></div></div></div>
-<div class="modal" id="sleepModal"><div class="sheet"><h3>Sleep & Wake</h3><p>Enter the time you actually went to sleep and the time you actually woke up.</p><div class="fields"><div class="field"><label>Actual Sleep</label><input type="time" id="sleepInput"></div><div class="field"><label>Actual Wake</label><input type="time" id="wakeInput"></div></div><div class="sheetActions"><button class="btn secondary" id="cancelSleep">Cancel</button><button class="btn primary" id="saveSleep">Save</button></div></div></div>
+<div class="modal" id="timeModal"><div class="sheet"><h3 id="timeTitle">Edit Session</h3><p>Correct the real start/finish time. If the timer ran while you were interrupted, you can also correct the actual active duration.</p><div class="fields"><div class="field"><label>Started</label><input type="time" id="startInput"></div><div class="field"><label>Finished</label><input type="time" id="endInput"></div><div class="field"><label>Actual Active Duration (minutes)</label><input type="number" min="0" step="1" id="activeMinutesInput" placeholder="Optional"></div></div><div class="sheetActions"><button class="btn secondary" id="cancelTime">Cancel</button><button class="btn primary" id="saveTime">Save</button></div></div></div>
+<div class="modal" id="sleepModal"><div class="sheet"><h3>Sleep & Wake</h3><p>Adjust this day’s sleep/wake targets if needed, then enter the actual times.</p><div class="fields"><div class="field"><label>Target Sleep</label><input type="time" id="targetSleepInput"></div><div class="field"><label>Actual Sleep</label><input type="time" id="sleepInput"></div><div class="field"><label>Target Wake</label><input type="time" id="targetWakeInput"></div><div class="field"><label>Actual Wake</label><input type="time" id="wakeInput"></div></div><div class="sheetActions"><button class="btn secondary" id="cancelSleep">Cancel</button><button class="btn primary" id="saveSleep">Save</button></div></div></div>
 <script>
 const svg={wake:`<svg viewBox="0 0 24 24"><path d="M12 3v2M5.6 5.6 7 7M3 12h2M19 12h2M17 7l1.4-1.4"/><path d="M6 16a6 6 0 0 1 12 0"/><path d="M5 20h14"/></svg>`,bed:`<svg viewBox="0 0 24 24"><path d="M3 19V9M21 19v-6a3 3 0 0 0-3-3H9v9M3 15h18M6 10V7h4a2 2 0 0 1 2 2v1"/></svg>`,water:`<svg viewBox="0 0 24 24"><path d="M12 3s5 6 5 10a5 5 0 0 1-10 0c0-4 5-10 5-10z"/></svg>`,walk:`<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M10 9l2-2 3 2-1 4 3 3M11 12l-2 4-3 3M14 13l-3 1-2-3"/></svg>`,energy:`<svg viewBox="0 0 24 24"><path d="M13 2 6 13h6l-1 9 7-12h-6z"/></svg>`,smile:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 10h.01M16 10h.01M8 15c1 1 2.3 1.5 4 1.5S15 16 16 15"/></svg>`,yoga:`<svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2"/><path d="M12 7v5M7 9l5 3 5-3M8 20l4-8 4 8M6 15h12"/></svg>`,breath:`<svg viewBox="0 0 24 24"><path d="M3 9h9c2 0 3-1 3-2s-1-2-2-2"/><path d="M3 13h13c2 0 3 1 3 2s-1 2-2 2"/><path d="M3 17h8"/></svg>`,meditate:`<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><path d="M9 9h6l2 4M7 13l2-4M5 19c2-2 4-3 7-3s5 1 7 3M8 19h8"/></svg>`,spiral:`<svg viewBox="0 0 24 24"><path d="M12 12c0-3 4-3 4 0 0 4-6 5-8 1-2-5 4-9 9-6 6 4 2 13-5 13-5 0-9-3-9-8"/></svg>`,write:`<svg viewBox="0 0 24 24"><path d="m4 20 4-1 10-10-3-3L5 16z"/><path d="m14 7 3 3"/></svg>`,coffee:`<svg viewBox="0 0 24 24"><path d="M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z"/><path d="M16 10h2a2 2 0 0 1 0 4h-2M8 3v2M12 3v2"/></svg>`,supp:`<svg viewBox="0 0 24 24"><path d="M7 5h10v4H7zM8 9h8l1 11H7z"/><path d="M10 13h4"/></svg>`,fitness:`<svg viewBox="0 0 24 24"><path d="M4 9v6M7 7v10M17 7v10M20 9v6M7 12h10"/></svg>`,nidra:`<svg viewBox="0 0 24 24"><path d="M20 14a8 8 0 1 1-10-10 7 7 0 0 0 10 10z"/></svg>`,meal:`<svg viewBox="0 0 24 24"><path d="M5 3v8M8 3v8M5 7h3M7 11v10M15 3v18M15 3c3 1 4 4 4 7h-4"/></svg>`,gateway:`<svg viewBox="0 0 24 24"><path d="M5 20V9a7 7 0 0 1 14 0v11"/><path d="M9 20V9a3 3 0 0 1 6 0v11"/></svg>`,kids:`<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><path d="M4 18c0-3 2-5 4-5s4 2 4 5M12 18c0-3 2-5 4-5s4 2 4 5"/></svg>`,family:`<svg viewBox="0 0 24 24"><path d="M12 21s-7-4-9-9c-1.4-3.5 3-6 5.5-3.5L12 12l3.5-3.5C18 6 22.4 8.5 21 12c-2 5-9 9-9 9z"/></svg>`,wind:`<svg viewBox="0 0 24 24"><path d="M4 12h12c2 0 3-1 3-2s-1-2-2-2"/><path d="M4 16h8c2 0 3 1 3 2s-1 2-2 2"/></svg>`,anchor:`<svg viewBox="0 0 24 24"><path d="M12 3v15M8 7h8"/><path d="M5 14c0 4 3 7 7 7s7-3 7-7"/><path d="m5 14-2 2M19 14l2 2"/></svg>`};
 const practices=[
@@ -382,13 +401,290 @@ function renderSelectedDateLabel(){
  document.getElementById('nextDay').style.opacity=isToday?'.35':'1';
 }
 renderSelectedDateLabel();
-function save(){localStorage.setItem('lifeos-v26',JSON.stringify(store))}function mins(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}function tl(t){if(!t)return '—';let [h,m]=t.split(':').map(Number),ap=h>=12?'PM':'AM';return `${h%12||12}:${String(m).padStart(2,'0')} ${ap}`}function now(){let d=new Date();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}function variance(p,r){return r?.start?mins(r.start)-mins(p.target):null}function vlabel(v){if(v===null)return '—';if(v===0)return 'On time';return `${v>0?'+':''}${v}m`}function vclass(v){if(v===null)return '';let a=Math.abs(v);return a<=10?'on':a<=30?'shift':'late'}
-function renderSleep(){let r=dayStore()._sleep||{};document.getElementById('sleepActual').textContent=tl(r.sleep);document.getElementById('wakeActual').textContent=tl(r.wake);let dur='—',sv='—',wv='—',status='—';if(r.sleep&&r.wake){let s=mins(r.sleep),w=mins(r.wake);if(w<=s)w+=1440;let d=w-s;dur=`${Math.floor(d/60)}h ${d%60}m`;let sleepV=mins(r.sleep)-mins('21:15'),wakeV=mins(r.wake)-mins('04:45');sv=vlabel(sleepV);wv=vlabel(wakeV);status=(Math.abs(sleepV)<=15&&Math.abs(wakeV)<=15)?'On schedule':'Shifted'}document.getElementById('sleepDuration').textContent=dur;document.getElementById('sleepVar').textContent=sv;document.getElementById('wakeVar').textContent=wv;document.getElementById('sleepStatus').textContent=status}
+function save(){localStorage.setItem('lifeos-v26',JSON.stringify(store))}function mins(t){if(!t)return null;let [h,m]=t.split(':').map(Number);return h*60+m}function tl(t){if(!t)return '—';let [h,m]=t.split(':').map(Number),ap=h>=12?'PM':'AM';return `${h%12||12}:${String(m).padStart(2,'0')} ${ap}`}function now(){let d=new Date();return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+function clockNow(){return new Date().toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit',second:'2-digit'})}
+
+const openPractices=new Set();
+
+function sessionElapsedMs(r,nowTs=Date.now()){
+  if(!r||!r.startStamp)return 0;
+  if(Number.isFinite(r.activeOverrideMs))return Math.max(0,r.activeOverrideMs);
+  const end=r.endStamp||nowTs;
+  const paused=(r.pausedMs||0)+(r.paused&&r.pauseStamp?Math.max(0,end-r.pauseStamp):0);
+  return Math.max(0,end-r.startStamp-paused);
+}
+
+function activeRunningId(exceptId=null){
+  const data=dayStore();
+  for(const p of practices){
+    if(p.id===exceptId)continue;
+    const r=data[p.id];
+    if(r&&r.started&&!r.done&&r.startStamp)return p.id;
+  }
+  return null;
+}
+
+function pauseSession(id){
+  const r=dayStore()[id];
+  if(!r||r.done||!r.started)return;
+  const ts=Date.now();
+  if(r.paused){
+    if(r.pauseStamp)r.pausedMs=(r.pausedMs||0)+Math.max(0,ts-r.pauseStamp);
+    r.pauseStamp=null;
+    r.paused=false;
+  }else{
+    r.pauseStamp=ts;
+    r.paused=true;
+  }
+}
+
+function fmtElapsed(ms){ms=Math.max(0,Math.floor(ms||0));let total=Math.floor(ms/1000),h=Math.floor(total/3600),m=Math.floor((total%3600)/60),sec=total%60;return h?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`}
+function stampForSelectedTime(hhmm){if(!hhmm)return null;let [h,m]=hhmm.split(':').map(Number),d=new Date(selectedDate);d.setHours(h,m,0,0);return d.getTime()}function variance(p,r){return r?.start?mins(r.start)-mins(p.target):null}function vlabel(v){if(v===null)return '—';if(v===0)return 'On time';let a=Math.abs(v),dir=v>0?'late':'early';if(a<60)return `${a}m ${dir}`;let h=Math.floor(a/60),m=a%60;return `${h}h${m?' '+m+'m':''} ${dir}`}function vclass(v){if(v===null)return '';let a=Math.abs(v);return a<=10?'on':a<=30?'shift':'late'}
+function sleepVariance(actual,target){if(!actual||!target)return null;let v=mins(actual)-mins(target);if(v>720)v-=1440;if(v<-720)v+=1440;return v}
+function renderSleep(){let r=dayStore()._sleep||{},targetSleep=r.targetSleep||'21:15',targetWake=r.targetWake||'04:45';document.getElementById('targetSleepDisplay').textContent=tl(targetSleep);document.getElementById('targetWakeDisplay').textContent=tl(targetWake);document.getElementById('sleepActual').textContent=tl(r.sleep);document.getElementById('wakeActual').textContent=tl(r.wake);let dur='—',sv='—',wv='—',status='—';if(r.sleep&&r.wake){let s=mins(r.sleep),w=mins(r.wake);if(w<=s)w+=1440;let d=w-s;dur=`${Math.floor(d/60)}h ${d%60}m`;let sleepV=sleepVariance(r.sleep,targetSleep),wakeV=mins(r.wake)-mins(targetWake);sv=vlabel(sleepV);wv=vlabel(wakeV);status=(Math.abs(sleepV)<=15&&Math.abs(wakeV)<=15)?'On schedule':'Shifted'}document.getElementById('sleepDuration').textContent=dur;document.getElementById('sleepVar').textContent=sv;document.getElementById('wakeVar').textContent=wv;document.getElementById('sleepStatus').textContent=status}
 function renderChecklist(p,r){if(!p.checklist||!p.checklist.length)return '';const items=p.checklist.map(item=>{const checked=!!r.items?.[item.id];return `<label class="suppItem"><input class="suppCheck" type="checkbox" data-supp-practice="${p.id}" data-supp-id="${item.id}" ${checked?'checked':''}><span class="suppCopy"><b>${item.label}</b>${item.optional?'<span class="optTag">Optional</span>':''}${item.note?`<small>${item.note}</small>`:''}</span></label>`}).join('');return `<div class="suppBox"><div class="suppTitle">${p.checklistTitle||'Supplements'}</div>${items}</div>`}
-function renderPractices(){let h=document.getElementById('practiceList');h.innerHTML='';let current='';practices.forEach(p=>{if(p.group!==current){current=p.group;let g=document.createElement('div');g.className='blockTitle';g.textContent=current;h.appendChild(g)}let r=dayStore()[p.id]||{},v=variance(p,r),x=document.createElement('div');x.className='practice';x.innerHTML=`<div class="practiceMain" data-open="${p.id}"><div class="icon ${['coffee','meal','supp'].includes(p.icon)?'copper':''}">${svg[p.icon]}</div><div><h3>${p.name}${p.optional?' <span style="font-size:9px;color:#9b877a">OPTIONAL</span>':''}</h3><div class="sub">Target ${tl(p.target)} · ${p.flexDur||p.dur+' min'}${r.choice?' · '+r.choice:''}</div>${p.note?`<div class="sub" style="margin-top:3px">${p.note}</div>`:''}</div><button class="check ${r.done?'done':''}" data-toggle="${p.id}">${r.done?'✓':'○'}</button></div><div class="details"><div class="timing"><div class="cell"><label>Target</label><strong>${tl(p.target)}</strong></div><div class="cell"><label>Started</label><strong>${tl(r.start)}</strong></div><div class="cell"><label>Finished</label><strong>${tl(r.end)}</strong></div><div class="cell"><label>Variance</label><strong class="var ${vclass(v)}">${vlabel(v)}</strong></div></div>${p.choice?`<select class="selector" data-choice="${p.id}"><option value="">Choose activity</option><option ${r.choice==='Football'?'selected':''}>Football</option><option ${r.choice==='Swimming'?'selected':''}>Swimming</option><option ${r.choice==='Gymnastics'?'selected':''}>Gymnastics</option><option ${r.choice==='Other / Family Choice'?'selected':''}>Other / Family Choice</option></select>`:''}${renderChecklist(p,r)}<div class="actions">${!r.started&&!r.done?`<button class="btn primary" data-action="start" data-id="${p.id}">Start Now</button>`:''}${r.started&&!r.done?`<button class="btn primary" data-action="finish" data-id="${p.id}">Complete Now</button>`:''}<button class="btn secondary" data-action="edit" data-id="${p.id}">Edit Time</button>${r.done?`<button class="btn warn" data-action="undo" data-id="${p.id}">Undo</button>`:''}</div><textarea class="note" data-note="${p.id}" placeholder="Optional note…">${r.note||''}</textarea></div>`;h.appendChild(x)});document.querySelectorAll('[data-open]').forEach(x=>x.onclick=e=>{if(e.target.closest('button')||e.target.closest('input')||e.target.closest('select'))return;e.currentTarget.parentElement.classList.toggle('open')});document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=e=>{e.stopPropagation();let id=b.dataset.toggle,r=dayStore()[id]||(dayStore()[id]={});if(r.done){r.done=false}else{r.done=true;if(!r.start)r.start=now();if(!r.end)r.end=now();r.started=true}save();renderAll()});document.querySelectorAll('[data-action]').forEach(b=>b.onclick=handleAction);document.querySelectorAll('[data-choice]').forEach(sel=>sel.onchange=()=>{let r=dayStore()[sel.dataset.choice]||(dayStore()[sel.dataset.choice]={});r.choice=sel.value;save();renderAll()});document.querySelectorAll('[data-note]').forEach(n=>n.onchange=()=>{let r=dayStore()[n.dataset.note]||(dayStore()[n.dataset.note]={});r.note=n.value;save()});document.querySelectorAll('[data-supp-practice]').forEach(cb=>cb.onchange=()=>{let pid=cb.dataset.suppPractice,sid=cb.dataset.suppId,r=dayStore()[pid]||(dayStore()[pid]={});if(!r.items)r.items={};r.items[sid]=cb.checked;save()})}
-function handleAction(e){let id=e.currentTarget.dataset.id,act=e.currentTarget.dataset.action,r=dayStore()[id]||(dayStore()[id]={});if(act==='start'){r.start=now();r.started=true}if(act==='finish'){if(!r.start)r.start=now();r.end=now();r.done=true;r.started=true}if(act==='undo'){r.done=false;r.end=null}if(act==='edit'){editing=id;let p=practices.find(x=>x.id===id);document.getElementById('timeTitle').textContent=p.name;document.getElementById('startInput').value=r.start||'';document.getElementById('endInput').value=r.end||'';document.getElementById('timeModal').classList.add('show');return}save();renderAll()}
-document.getElementById('cancelTime').onclick=()=>document.getElementById('timeModal').classList.remove('show');document.getElementById('saveTime').onclick=()=>{let r=dayStore()[editing]||(dayStore()[editing]={});r.start=document.getElementById('startInput').value||null;r.end=document.getElementById('endInput').value||null;r.started=!!r.start;r.done=!!r.start;save();document.getElementById('timeModal').classList.remove('show');renderAll()};document.getElementById('timeModal').onclick=e=>{if(e.target.id==='timeModal')e.currentTarget.classList.remove('show')};
-document.getElementById('editSleep').onclick=()=>{let r=dayStore()._sleep||{};document.getElementById('sleepInput').value=r.sleep||'';document.getElementById('wakeInput').value=r.wake||'';document.getElementById('sleepModal').classList.add('show')};document.getElementById('cancelSleep').onclick=()=>document.getElementById('sleepModal').classList.remove('show');document.getElementById('saveSleep').onclick=()=>{dayStore()._sleep={sleep:document.getElementById('sleepInput').value||null,wake:document.getElementById('wakeInput').value||null};save();document.getElementById('sleepModal').classList.remove('show');renderAll()};document.getElementById('sleepModal').onclick=e=>{if(e.target.id==='sleepModal')e.currentTarget.classList.remove('show')};
+function renderPractices(){
+  let h=document.getElementById('practiceList');
+  h.innerHTML='';
+  let current='';
+
+  practices.forEach(p=>{
+    if(p.group!==current){
+      current=p.group;
+      let g=document.createElement('div');
+      g.className='blockTitle';
+      g.textContent=current;
+      h.appendChild(g);
+    }
+
+    let r=dayStore()[p.id]||{},v=variance(p,r),x=document.createElement('div');
+    const running=r.started&&!r.done&&!!r.startStamp;
+    const hasTiming=!!(r.start||r.end||r.startStamp||r.endStamp||r.pausedMs||r.pauseStamp||Number.isFinite(r.activeOverrideMs));
+    x.className='practice'+(openPractices.has(p.id)?' open':'');
+
+    x.innerHTML=`<div class="practiceMain" data-open="${p.id}">
+      <div class="icon ${['coffee','meal','supp'].includes(p.icon)?'copper':''}">${svg[p.icon]}</div>
+      <div>
+        <h3>${p.name}${p.optional?' <span style="font-size:9px;color:#9b877a">OPTIONAL</span>':''}</h3>
+        <div class="sub">Target ${tl(p.target)} · ${p.flexDur||p.dur+' min'}${r.choice?' · '+r.choice:''}</div>
+        ${p.note?`<div class="sub" style="margin-top:3px">${p.note}</div>`:''}
+      </div>
+      <button class="check ${r.done?'done':''}" data-toggle="${p.id}">${r.done?'✓':'○'}</button>
+    </div>
+
+    <div class="details">
+      <div class="timing">
+        <div class="cell"><label>Target</label><strong>${tl(p.target)}</strong></div>
+        <div class="cell"><label>Started</label><strong>${tl(r.start)}</strong></div>
+        <div class="cell"><label>Finished</label><strong>${tl(r.end)}</strong></div>
+        <div class="cell"><label>Variance</label><strong class="var ${vclass(v)}">${vlabel(v)}</strong></div>
+      </div>
+
+      ${running||r.done?`<div class="liveRun">
+        <div><div class="runLabel">Active Duration</div><div class="runValue" data-live-duration="${p.id}">${fmtElapsed(sessionElapsedMs(r))}</div></div>
+        <div class="runNow">Status<b>${r.done?'Completed':r.paused?'Paused':'Running'}</b></div>
+        <div class="runNow">Current time<b data-live-current>${clockNow()}</b></div>
+      </div>`:''}
+
+      ${p.choice?`<select class="selector" data-choice="${p.id}">
+        <option value="">Choose activity</option>
+        <option ${r.choice==='Football'?'selected':''}>Football</option>
+        <option ${r.choice==='Swimming'?'selected':''}>Swimming</option>
+        <option ${r.choice==='Gymnastics'?'selected':''}>Gymnastics</option>
+        <option ${r.choice==='Other / Family Choice'?'selected':''}>Other / Family Choice</option>
+      </select>`:''}
+
+      ${renderChecklist(p,r)}
+
+      <div class="sessionControls">
+        ${!r.started&&!r.done?`<button class="btn primary" data-action="start" data-id="${p.id}">Start Now</button>`:''}
+        ${running?`<button class="btn pauseBtn" data-action="pause" data-id="${p.id}">${r.paused?'Resume':'Pause'}</button>
+                   <button class="btn primary" data-action="finish" data-id="${p.id}">Complete Now</button>`:''}
+        ${hasTiming?`<button class="btn secondary" data-action="edit" data-id="${p.id}">Edit Session</button>
+                     <button class="btn resetBtn" data-action="reset" data-id="${p.id}">Reset Session</button>`:''}
+        ${r.done?`<button class="btn warn" data-action="undo" data-id="${p.id}">Undo</button>`:''}
+      </div>
+
+      <textarea class="note" data-note="${p.id}" placeholder="Optional note…">${r.note||''}</textarea>
+    </div>`;
+
+    h.appendChild(x);
+  });
+
+  document.querySelectorAll('[data-open]').forEach(el=>el.onclick=e=>{
+    if(e.target.closest('button')||e.target.closest('input')||e.target.closest('select'))return;
+    const id=el.dataset.open;
+    if(openPractices.has(id))openPractices.delete(id);
+    else openPractices.add(id);
+    el.parentElement.classList.toggle('open');
+  });
+
+  document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const id=b.dataset.toggle;
+    const r=dayStore()[id]||(dayStore()[id]={});
+    openPractices.add(id);
+
+    if(r.done){
+      r.done=false;
+      r.end=null;
+      r.endStamp=null;
+      r.started=!!r.startStamp;
+    }else{
+      const ts=Date.now(),d=new Date(ts);
+      if(!r.startStamp){
+        r.startStamp=ts;
+        r.start=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      }
+      if(r.paused&&r.pauseStamp){
+        r.pausedMs=(r.pausedMs||0)+Math.max(0,ts-r.pauseStamp);
+        r.pauseStamp=null;
+        r.paused=false;
+      }
+      r.endStamp=ts;
+      r.end=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      r.done=true;
+      r.started=true;
+    }
+    save();
+    renderAll();
+  });
+
+  document.querySelectorAll('[data-action]').forEach(b=>b.onclick=handleAction);
+
+  document.querySelectorAll('[data-choice]').forEach(sel=>sel.onchange=()=>{
+    let r=dayStore()[sel.dataset.choice]||(dayStore()[sel.dataset.choice]={});
+    r.choice=sel.value;
+    openPractices.add(sel.dataset.choice);
+    save();
+    renderAll();
+  });
+
+  document.querySelectorAll('[data-note]').forEach(n=>n.onchange=()=>{
+    let r=dayStore()[n.dataset.note]||(dayStore()[n.dataset.note]={});
+    r.note=n.value;
+    save();
+  });
+
+  document.querySelectorAll('[data-supp-practice]').forEach(cb=>cb.onchange=()=>{
+    let pid=cb.dataset.suppPractice,sid=cb.dataset.suppId,r=dayStore()[pid]||(dayStore()[pid]={});
+    if(!r.items)r.items={};
+    r.items[sid]=cb.checked;
+    openPractices.add(pid);
+    save();
+  });
+}
+function handleAction(e){
+  const id=e.currentTarget.dataset.id;
+  const act=e.currentTarget.dataset.action;
+  let r=dayStore()[id]||(dayStore()[id]={});
+  openPractices.add(id);
+
+  if(act==='start'){
+    const other=activeRunningId(id);
+    if(other){
+      const op=practices.find(p=>p.id===other);
+      if(!confirm(`${op?op.name:'Another practice'} is still running. Pause it and start this practice?`))return;
+      const or=dayStore()[other];
+      if(or&&!or.paused)pauseSession(other);
+      openPractices.add(other);
+    }
+    const ts=Date.now(),d=new Date(ts);
+    r.start=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    r.startStamp=ts;
+    r.end=null;r.endStamp=null;
+    r.started=true;r.done=false;
+    r.paused=false;r.pauseStamp=null;r.pausedMs=0;
+    r.activeOverrideMs=null;
+  }
+
+  if(act==='pause'){
+    pauseSession(id);
+  }
+
+  if(act==='finish'){
+    const ts=Date.now(),d=new Date(ts);
+    if(!r.startStamp){
+      r.startStamp=ts;
+      r.start=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+    if(r.paused&&r.pauseStamp){
+      r.pausedMs=(r.pausedMs||0)+Math.max(0,ts-r.pauseStamp);
+      r.pauseStamp=null;
+      r.paused=false;
+    }
+    r.end=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    r.endStamp=ts;
+    r.done=true;
+    r.started=true;
+  }
+
+  if(act==='undo'){
+    r.done=false;
+    r.end=null;
+    r.endStamp=null;
+    r.started=!!r.startStamp;
+  }
+
+  if(act==='reset'){
+    if(!confirm('Reset all timing for this session?'))return;
+    r.start=null;r.end=null;
+    r.startStamp=null;r.endStamp=null;
+    r.started=false;r.done=false;
+    r.paused=false;r.pauseStamp=null;r.pausedMs=0;
+    r.activeOverrideMs=null;
+  }
+
+  if(act==='edit'){
+    editing=id;
+    const p=practices.find(x=>x.id===id);
+    document.getElementById('timeTitle').textContent=(p?p.name:'Practice')+' · Edit Session';
+    document.getElementById('startInput').value=r.start||'';
+    document.getElementById('endInput').value=r.end||'';
+    document.getElementById('activeMinutesInput').value=Number.isFinite(r.activeOverrideMs)
+      ? Math.round(r.activeOverrideMs/60000)
+      : (r.startStamp?Math.round(sessionElapsedMs(r)/60000):'');
+    document.getElementById('timeModal').classList.add('show');
+    return;
+  }
+
+  save();
+  renderAll();
+}
+document.getElementById('cancelTime').onclick=()=>document.getElementById('timeModal').classList.remove('show');document.getElementById('saveTime').onclick=()=>{
+  if(!editing)return;
+  const r=dayStore()[editing]||(dayStore()[editing]={});
+  const s=document.getElementById('startInput').value||null;
+  const e=document.getElementById('endInput').value||null;
+  const activeRaw=document.getElementById('activeMinutesInput').value;
+
+  r.start=s;
+  r.end=e;
+  r.startStamp=s?stampForSelectedTime(s):null;
+  r.endStamp=e?stampForSelectedTime(e):null;
+  if(r.startStamp&&r.endStamp&&r.endStamp<r.startStamp)r.endStamp+=86400000;
+
+  r.started=!!r.startStamp;
+  r.done=!!r.endStamp;
+
+  if(activeRaw!==''){
+    r.activeOverrideMs=Math.max(0,Number(activeRaw)||0)*60000;
+  }else{
+    r.activeOverrideMs=null;
+  }
+
+  if(!r.started){
+    r.paused=false;r.pauseStamp=null;r.pausedMs=0;
+  }
+
+  openPractices.add(editing);
+  save();
+  document.getElementById('timeModal').classList.remove('show');
+  editing=null;
+  renderAll();
+};
+document.getElementById('timeModal').onclick=e=>{if(e.target.id==='timeModal')e.currentTarget.classList.remove('show')};
+document.getElementById('editSleep').onclick=()=>{let r=dayStore()._sleep||{};document.getElementById('targetSleepInput').value=r.targetSleep||'21:15';document.getElementById('sleepInput').value=r.sleep||'';document.getElementById('targetWakeInput').value=r.targetWake||'04:45';document.getElementById('wakeInput').value=r.wake||'';document.getElementById('sleepModal').classList.add('show')};document.getElementById('cancelSleep').onclick=()=>document.getElementById('sleepModal').classList.remove('show');document.getElementById('saveSleep').onclick=()=>{let r=dayStore()._sleep||{};r.targetSleep=document.getElementById('targetSleepInput').value||'21:15';r.sleep=document.getElementById('sleepInput').value||null;r.targetWake=document.getElementById('targetWakeInput').value||'04:45';r.wake=document.getElementById('wakeInput').value||null;dayStore()._sleep=r;save();document.getElementById('sleepModal').classList.remove('show');renderAll()};document.getElementById('sleepModal').onclick=e=>{if(e.target.id==='sleepModal')e.currentTarget.classList.remove('show')};
 function renderHeader(){let req=practices.filter(p=>!p.optional),done=req.filter(p=>dayStore()[p.id]?.done),pct=Math.round(done.length/req.length*100);document.getElementById('pct').textContent=pct+'%';document.getElementById('ring').style.setProperty('--p',pct);document.getElementById('count').textContent=`${done.length} / ${req.length}`;let timed=req.filter(p=>dayStore()[p.id]?.start),vs=timed.map(p=>Math.abs(variance(p,dayStore()[p.id]))),align=vs.length?Math.max(0,Math.round(100-(vs.reduce((a,b)=>a+b,0)/vs.length)*1.5)):null;document.getElementById('align').textContent=align===null?'—':align+'%';let next=practices.find(p=>!dayStore()[p.id]?.done);document.getElementById('nextName').textContent=next?next.name:'Day complete';document.getElementById('nextSub').textContent=next?`Target ${tl(next.target)}`:'All scheduled practices completed';document.getElementById('nextTime').textContent=next?tl(next.target):'—';let signed=timed.map(p=>variance(p,dayStore()[p.id]));let net=signed.length?Math.round(signed.reduce((a,b)=>a+b,0)):null;document.getElementById('saved').textContent=net===null?'—':(net<0?`${Math.abs(net)}m gained`:`${net}m delayed`)}
 function renderDomains(){let h=document.getElementById('domains');h.innerHTML='';domainsData.forEach(d=>{let x=document.createElement('div');x.className='domain';x.innerHTML=`<div class="domainIcon">${d[3]}</div><div class="num">DOMAIN ${d[0]}</div><h3>${d[1]}</h3><p>${d[2]}</p>`;h.appendChild(x)})}
 function renderTiming(){let h=document.getElementById('timingList');h.innerHTML='';let timed=practices.filter(p=>dayStore()[p.id]?.start),vs=timed.map(p=>Math.abs(variance(p,dayStore()[p.id]))),on=vs.filter(v=>v<=10).length,pct=vs.length?Math.round(on/vs.length*100):0,avg=vs.length?Math.round(vs.reduce((a,b)=>a+b,0)/vs.length):null;document.getElementById('timedCount').textContent=`${timed.length} / ${practices.length}`;document.getElementById('timedBar').style.width=Math.round(timed.length/practices.length*100)+'%';document.getElementById('onTargetPct').textContent=vs.length?pct+'%':'—';document.getElementById('onTargetBar').style.width=pct+'%';document.getElementById('avgDev').textContent=avg===null?'—':avg+' min';practices.forEach(p=>{let r=dayStore()[p.id]||{},v=variance(p,r),x=document.createElement('div');x.className='practice';x.innerHTML=`<div class="practiceMain"><div class="icon">${svg[p.icon]}</div><div><h3>${p.name}</h3><div class="sub">Target ${tl(p.target)} · Actual ${tl(r.start)}</div></div><div class="var ${vclass(v)}" style="font-weight:800;font-size:12px">${vlabel(v)}</div></div>`;h.appendChild(x)})}
@@ -404,7 +700,7 @@ function renderData(){
   document.getElementById('dataCurrentStreak').textContent=currentStreakValue();
   document.getElementById('dataLongestStreak').textContent=longestStreakValue();
 }
-function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.11.3',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Life OS Day','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,lifeDayNumberFor(k)||'',p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
+function download(name,content,type){let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)}document.getElementById('backupBtn').onclick=()=>download(`LifeOS_Backup_${selectedKey()}.json`,JSON.stringify({format:'LifeOSBackup',version:'2.18',exportedAt:new Date().toISOString(),data:store},null,2),'application/json');document.getElementById('csvBtn').onclick=()=>{let rows=[['Date','Life OS Day','Practice','Target','Actual Start','Finished','Variance Minutes','Completed','Choice','Checklist Items Completed','Notes','Actual Sleep','Actual Wake']];Object.keys(store).sort().forEach(k=>{let sl=store[k]?._sleep||{};practices.forEach(p=>{let r=store[k]?.[p.id];if(!r)return;let val=r.start?mins(r.start)-mins(p.target):'';let completedItems=p.checklist?p.checklist.filter(it=>r.items?.[it.id]).map(it=>it.label).join(' | '):'';rows.push([k,lifeDayNumberFor(k)||'',p.name,p.target,r.start||'',r.end||'',val,r.done?'Yes':'No',r.choice||'',completedItems,r.note||'',sl.sleep||'',sl.wake||''])})});let esc=s=>{s=(s??'').toString();return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};download(`LifeOS_History_${todayKey}.csv`,rows.map(r=>r.map(esc).join(',')).join('\n'),'text/csv;charset=utf-8')};document.getElementById('restoreBtn').onclick=()=>document.getElementById('restoreFile').click();document.getElementById('restoreFile').onchange=e=>{let f=e.target.files?.[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{let p=JSON.parse(rd.result),incoming=p.data||p;if(confirm('Replace current Life OS data with this backup?')){store=incoming;save();renderAll();alert('Backup restored.')}}catch{alert('Invalid Life OS backup file.')}};rd.readAsText(f);e.target.value=''};
 function switchTab(tab){['today','domains','timing','week','data'].forEach(t=>document.getElementById(t+'View').style.display=t===tab?'block':'none');document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab))}document.getElementById('prevDay').onclick=()=>{
  selectedDate=new Date(selectedDate);
  selectedDate.setDate(selectedDate.getDate()-1);
@@ -424,7 +720,8 @@ document.getElementById('jumpToday').onclick=()=>{
  selectedDate=new Date(today);dayStore();renderSelectedDateLabel();renderAll();
  window.scrollTo({top:0,behavior:'smooth'});
 };
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));function renderAll(){renderSleep();renderPractices();renderHeader();renderLifeDayTracking();renderDomains();renderTiming();renderWeek();renderData();renderSelectedDateLabel()}renderAll();
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));function updateLiveTime(){let c=document.getElementById('liveNowClock');if(c)c.textContent=clockNow();document.querySelectorAll('[data-live-current]').forEach(el=>el.textContent=clockNow());document.querySelectorAll('[data-live-duration]').forEach(el=>{let r=dayStore()[el.dataset.liveDuration]||{};el.textContent=r.startStamp?fmtElapsed(sessionElapsedMs(r)):'00:00'})}
+function renderAll(){renderSleep();renderPractices();renderHeader();renderLifeDayTracking();renderDomains();renderTiming();renderWeek();renderData();renderSelectedDateLabel();updateLiveTime()}renderAll();setInterval(updateLiveTime,1000);
 </script>
 </body>
 </html>
